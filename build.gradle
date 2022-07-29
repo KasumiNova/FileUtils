@@ -1,0 +1,49 @@
+plugins {
+    id 'java'
+}
+
+group 'github.kasuminova'
+version '1.0-SNAPSHOT'
+
+repositories {
+    maven {
+        url 'https://maven.aliyun.com/nexus/content/groups/public/'
+    }
+    maven {
+        url 'https://maven.aliyun.com/repository/central'
+    }
+    mavenCentral()
+}
+
+jar {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    archivesBaseName = 'FileUtils'//基本的文件名
+    archiveVersion = '1.4' //版本
+    manifest { //配置 Jar 文件的 Manifest
+        attributes(
+                "Manifest-Version": 1.0,
+                'Main-Class': 'github.kasuminova.fileutils.Main' //指定 Main 方法所在的文件
+        )
+    }
+    //打包依赖包
+    from {
+        (configurations.runtimeClasspath).collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+dependencies {
+    implementation 'com.formdev:flatlaf:2.4'
+    implementation 'com.formdev:flatlaf-intellij-themes:2.4'
+    implementation 'org.yaml:snakeyaml:1.30'
+//    implementation 'io.netty:netty-all:4.1.79.Final'
+}
+
+tasks.withType(JavaCompile) {
+    options.encoding = "UTF-8"
+}
+
+test {
+    useJUnitPlatform()
+}
