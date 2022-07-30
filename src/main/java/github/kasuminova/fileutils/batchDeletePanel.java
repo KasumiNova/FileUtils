@@ -23,19 +23,6 @@ public class batchDeletePanel {
     JLabel targetDeleteFileOrDirLabel = new JLabel("输入要删除的文件/文件夹: ");
     JTextField targetDeleteFileOrDir = new JTextField();
     JScrollPane targetDeleteFileOrDirScrollPane = new JScrollPane(targetDeleteFileOrDir,JScrollPane.VERTICAL_SCROLLBAR_NEVER,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-    static String[] dangerousStr = {
-            "plugins",
-            "world",
-            "server.properties"
-    };
-    static String[] unavailableStr = {
-            ":",
-            "*",
-            "?",
-            "<",
-            ">",
-            "|"
-    };
     public JPanel createPanel(JFrame fileUtils) {
         //主界面
         JPanel batchDeleteUtilPanel = new JPanel(new VFlowLayout());
@@ -156,25 +143,21 @@ public class batchDeletePanel {
         //开始操作文件
         start1.addActionListener(e -> {
             String mainDirTmp = backupDirTextField.getText();
-            if (!mainDirTmp.isEmpty()) {
-                if (new File("./" + mainDirTmp).exists()) {
-                    if (securityCheck(targetDeleteFileOrDir.getText(), fileUtils)) {
-                        statusLabel.setText("状态: 操作进行中");
-                        //创建临时路径变量
-                        List<String> targetFileTmp = new ArrayList<>();
-                        //为临时路径变量添加上删除的路径
-                        for (String s : targetFile) {
-                            targetFileTmp.add(s + "/" + targetDeleteFileOrDir.getText());
-                        }
-
-                        //详见 FileUtil 类
-                        batchBackupAndDelete(targetFileTmp, mainDirTmp, fileUtils, statusBar, statusLabel);
+            if (!mainDirTmp.isEmpty() && new File("./" + mainDirTmp).exists()) {
+                if (securityCheck(targetDeleteFileOrDir.getText(), targetFile, fileUtils)) {
+                    statusLabel.setText("状态: 操作进行中");
+                    //创建临时路径变量
+                    List<String> targetFileTmp = new ArrayList<>();
+                    //为临时路径变量添加上删除的路径
+                    for (String s : targetFile) {
+                        targetFileTmp.add(s + "/" + targetDeleteFileOrDir.getText());
                     }
-                } else {
-                    JOptionPane.showMessageDialog(fileUtils, "备份文件夹不存在。", "错误", JOptionPane.ERROR_MESSAGE);
+
+                    //详见 FileUtil 类
+                    batchBackupAndDelete(targetFileTmp, mainDirTmp, fileUtils, statusBar, statusLabel);
                 }
             } else {
-                JOptionPane.showMessageDialog(fileUtils, "备份文件夹输入框为空。", "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(fileUtils, "备份文件夹输入框为空，或备份文件夹不存在。", "错误", JOptionPane.ERROR_MESSAGE);
             }
         });
         dirList1Panel.add(start1);
@@ -185,29 +168,25 @@ public class batchDeletePanel {
 
         start2.addActionListener(e -> {
             String mainDirTmp = backupDirTextField.getText();
-            if (!mainDirTmp.isEmpty()) {
+            if (!mainDirTmp.isEmpty() && new File("./" + mainDirTmp).exists()) {
                 if (dirList1List != null && dirList1List.size() > 0) {
-                    if (new File("./" + mainDirTmp).exists()) {
-                        if (securityCheck(targetDeleteFileOrDir.getText(), fileUtils)) {
-                            statusLabel.setText("状态: 操作进行中");
-                            //创建临时路径变量
-                            List<String> targetFileTmp = new ArrayList<>();
-                            //为临时路径变量添加上删除的路径
-                            for (String s : dirList1List) {
-                                targetFileTmp.add(s + "/" + targetDeleteFileOrDir.getText());
-                            }
-
-                            //详见 FileUtil 类
-                            batchBackupAndDelete(targetFileTmp, mainDirTmp, fileUtils, statusBar, statusLabel);
+                    if (securityCheck(targetDeleteFileOrDir.getText(), dirList1List, fileUtils)) {
+                        statusLabel.setText("状态: 操作进行中");
+                        //创建临时路径变量
+                        List<String> targetFileTmp = new ArrayList<>();
+                        //为临时路径变量添加上删除的路径
+                        for (String s : dirList1List) {
+                            targetFileTmp.add(s + "/" + targetDeleteFileOrDir.getText());
                         }
-                    } else {
-                        JOptionPane.showMessageDialog(fileUtils, "备份文件夹不存在。", "错误", JOptionPane.ERROR_MESSAGE);
+
+                        //详见 FileUtil 类
+                        batchBackupAndDelete(targetFileTmp, mainDirTmp, fileUtils, statusBar, statusLabel);
                     }
                 } else {
                     JOptionPane.showMessageDialog(fileUtils, "临时配置为空。", "错误", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                JOptionPane.showMessageDialog(fileUtils, "备份文件夹输入框为空。", "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(fileUtils, "备份文件夹输入框为空，或备份文件夹不存在。", "错误", JOptionPane.ERROR_MESSAGE);
             }
         });
         dirList2Panel.add(start2);
@@ -225,21 +204,62 @@ public class batchDeletePanel {
         return batchDeleteUtilPanel;
     }
 
-    //安全检测
-    private static boolean securityCheck(String str, JFrame fileUtils) {
-        //安全检测
-        if (str.isEmpty()) {
+    /**
+     * 安全检测
+     * @param target 要检测的字符串
+     * @param rootDirList 根文件夹
+     * @param fileUtils 主窗口
+     * @return 通过为 true，未通过为 false
+     */
+    private static boolean securityCheck(String target, List<String> rootDirList, JFrame fileUtils) {
+        //空内容检查
+        if (target.isEmpty()) {
             JOptionPane.showMessageDialog(fileUtils, "输入内容为空。", "错误", JOptionPane.ERROR_MESSAGE);
             return false;
         }
+
+        while (target.endsWith(".") || target.endsWith("/")) {
+            //去除末尾的 "."
+            if (target.endsWith(".")) {
+                target = target.substring(0, target.length() - 1);
+            }
+            //去除末尾的 "/"
+            if (target.endsWith("/")) {
+                target = target.substring(0, target.length() - 1);
+            }
+        }
+
+        //非法字符
+        String[] unavailableStr = {":", "*", "?", "<", ">", "|"};
+        //非法字符检查
         for (String s : unavailableStr) {
-            if (str.contains(s)) {
-                JOptionPane.showMessageDialog(fileUtils, "名称包含非法字符。", "错误", JOptionPane.ERROR_MESSAGE);
+            if (target.contains(s)) {
+                JOptionPane.showMessageDialog(fileUtils, "名称包含非法字符“" + s + "”。", "错误", JOptionPane.ERROR_MESSAGE);
                 return false;
             }
         }
+
+        //根文件夹检查
+        for (String s : rootDirList) {
+            String targetFile = new File("./" + s + "/").getAbsolutePath();
+            System.out.println(targetFile);
+            String rootDir = new File("./" + s + "/" + target).getAbsolutePath();
+            System.out.println(rootDir);
+            if (targetFile.equals(rootDir)) {
+                JOptionPane.showMessageDialog(fileUtils, "不可删除根文件夹 " + rootDir + "。", "错误", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+
+        //危险关键词
+        String[] dangerousStr = {
+                "plugins",
+                "world",
+                "server.properties"
+        };
+        //危险关键词检查
         for (String s : dangerousStr) {
-            if (str.contains(s)) {
+            if (target.contains(s)) {
                 int choice = JOptionPane.showConfirmDialog(fileUtils, "您所输入的路径存在危险关键词: “" + s + "”,你确定要继续批量删除操作吗？", "警告", JOptionPane.YES_NO_OPTION);
                 //如果选择为是则继续执行命令，如果为否则中断执行
                 return choice == JOptionPane.YES_OPTION;
