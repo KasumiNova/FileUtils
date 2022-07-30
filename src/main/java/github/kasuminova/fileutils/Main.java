@@ -12,7 +12,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class Main {
-    JFrame fileUtils = new JFrame("文件批量管理工具");
+    //版本号
+    public static final String version = "1.5.2";
+    JFrame fileUtils = new JFrame("文件批量管理工具 " + version);
     JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.LEFT,JTabbedPane.SCROLL_TAB_LAYOUT);
     static Map<String, Object> config;
     //主文件夹
