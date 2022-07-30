@@ -45,8 +45,8 @@ public class SetupSwing {
         UIManager.put("ScrollBar.showButtons", true);
         UIManager.put("ScrollBar.trackArc", 999);
         UIManager.put("ScrollBar.thumbArc", 999);
-        UIManager.put("ScrollBar.width", 18);
-        UIManager.put("ScrollBar.trackInsets", new Insets(2,7,2,7));
+        UIManager.put("ScrollBar.width", 14);
+        UIManager.put("ScrollBar.trackInsets", new Insets(2,5,2,5));
         UIManager.put("ScrollBar.thumbInsets", new Insets(2,4,2,4));
         UIManager.put("ScrollBar.track", new Color(0xC1C1C1));
 

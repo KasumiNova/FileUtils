@@ -22,6 +22,7 @@ public class batchDeletePanel {
     JTextField backupDirTextField = new JTextField();
     JLabel targetDeleteFileOrDirLabel = new JLabel("输入要删除的文件/文件夹: ");
     JTextField targetDeleteFileOrDir = new JTextField();
+    JScrollPane targetDeleteFileOrDirScrollPane = new JScrollPane(targetDeleteFileOrDir,JScrollPane.VERTICAL_SCROLLBAR_NEVER,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
     static String[] dangerousStr = {
             "plugins",
             "world",
@@ -48,7 +49,7 @@ public class batchDeletePanel {
         //要删除的文件/文件夹
         Box targetDeleteFileOrDirBox = Box.createHorizontalBox();
         targetDeleteFileOrDirBox.add(targetDeleteFileOrDirLabel);
-        targetDeleteFileOrDirBox.add(targetDeleteFileOrDir);
+        targetDeleteFileOrDirBox.add(targetDeleteFileOrDirScrollPane);
 
         //文件夹列表
         String[] copyToDirPathArr = targetFile.toArray(new String[targetFile.size()]);
@@ -173,7 +174,7 @@ public class batchDeletePanel {
                     JOptionPane.showMessageDialog(fileUtils, "备份文件夹不存在。", "错误", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                JOptionPane.showMessageDialog(fileUtils, "目标文件夹为空。", "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(fileUtils, "备份文件夹输入框为空。", "错误", JOptionPane.ERROR_MESSAGE);
             }
         });
         dirList1Panel.add(start1);
@@ -206,7 +207,7 @@ public class batchDeletePanel {
                     JOptionPane.showMessageDialog(fileUtils, "临时配置为空。", "错误", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                JOptionPane.showMessageDialog(fileUtils, "目标文件夹为空。", "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(fileUtils, "备份文件夹输入框为空。", "错误", JOptionPane.ERROR_MESSAGE);
             }
         });
         dirList2Panel.add(start2);
