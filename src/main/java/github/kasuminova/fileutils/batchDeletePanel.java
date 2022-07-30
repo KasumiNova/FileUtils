@@ -10,29 +10,45 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static github.kasuminova.fileutils.FileUtil.copyFile;
-import static github.kasuminova.fileutils.FileUtil.multiThreadedCopyFile;
+import static github.kasuminova.fileutils.FileUtil.batchBackupAndDelete;
 import static github.kasuminova.fileutils.Main.targetFile;
 import static github.kasuminova.fileutils.Main.mainDir;
 
-public class batchCopyPanel {
+public class batchDeletePanel {
     public static List<String> dirList1List = new ArrayList<>();
-    JButton start1 = new JButton("开始复制（默认配置）");
-    JButton start2 = new JButton("开始复制（临时配置）");
-    JTextField mainDirTextField = new JTextField();
-    JLabel mainDirLabel = new JLabel("主文件夹: ");
-    /**
-     * 创建一个批量复制器的面板
-     * @param fileUtils 程序主面板
-     * @return 批量复制器面板
-     */
+    JButton start1 = new JButton("开始删除（默认配置）");
+    JButton start2 = new JButton("开始删除（临时配置）");
+    JLabel backupDirLabel = new JLabel("备份文件夹: ");
+    JTextField backupDirTextField = new JTextField();
+    JLabel targetDeleteFileOrDirLabel = new JLabel("输入要删除的文件/文件夹: ");
+    JTextField targetDeleteFileOrDir = new JTextField();
+    static String[] dangerousStr = {
+            "plugins",
+            "world",
+            "server.properties"
+    };
+    static String[] unavailableStr = {
+            ":",
+            "*",
+            "?",
+            "<",
+            ">",
+            "|"
+    };
     public JPanel createPanel(JFrame fileUtils) {
         //主界面
-        JPanel batchCopyUtilPanel = new JPanel(new VFlowLayout());
-        mainDirTextField.setText(mainDir);
+        JPanel batchDeleteUtilPanel = new JPanel(new VFlowLayout());
+        backupDirTextField.setText("FileUtils/Backup");
+
+        //备份文件夹
         Box mainDirBox = Box.createHorizontalBox();
-        mainDirBox.add(mainDirLabel);
-        mainDirBox.add(mainDirTextField);
+        mainDirBox.add(backupDirLabel);
+        mainDirBox.add(backupDirTextField);
+
+        //要删除的文件/文件夹
+        Box targetDeleteFileOrDirBox = Box.createHorizontalBox();
+        targetDeleteFileOrDirBox.add(targetDeleteFileOrDirLabel);
+        targetDeleteFileOrDirBox.add(targetDeleteFileOrDir);
 
         //文件夹列表
         String[] copyToDirPathArr = targetFile.toArray(new String[targetFile.size()]);
@@ -95,10 +111,10 @@ public class batchCopyPanel {
         dirList1.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseReleased(MouseEvent e) {
-            if (e.isPopupTrigger()){
-                //显示 popupMenu
-                dirList1Menu.show(dirList1,e.getX(),e.getY());
-            }
+                if (e.isPopupTrigger()){
+                    //显示 popupMenu
+                    dirList1Menu.show(dirList1,e.getX(),e.getY());
+                }
             }
         });
 
@@ -136,24 +152,29 @@ public class batchCopyPanel {
         bottomStatusPanel.add(statusLabelPanel, BorderLayout.WEST);
         bottomStatusPanel.add(statusBarPanel, BorderLayout.EAST);
 
-        JCheckBox useMultiThread = new JCheckBox("实验性: 启用多线程复制", false);
-        useMultiThread.setToolTipText("使用多线程可以大大加快复制大量文件的速度(最高 300%)，但是可能存在未知问题。");
-
         //开始操作文件
         start1.addActionListener(e -> {
-            final String mainDirTmp = mainDirTextField.getText();
-            if (new File("./" + mainDirTmp).exists()) {
-                statusLabel.setText("状态: 操作进行中");
-                if (useMultiThread.isSelected()) {
-                    multiThreadedCopyFile(mainDirTmp, targetFile, fileUtils, statusBar, statusLabel);
+            String mainDirTmp = backupDirTextField.getText();
+            if (!mainDirTmp.isEmpty()) {
+                if (new File("./" + mainDirTmp).exists()) {
+                    if (securityCheck(targetDeleteFileOrDir.getText(), fileUtils)) {
+                        statusLabel.setText("状态: 操作进行中");
+                        //创建临时路径变量
+                        List<String> targetFileTmp = new ArrayList<>();
+                        //为临时路径变量添加上删除的路径
+                        for (String s : targetFile) {
+                            targetFileTmp.add(s + "/" + targetDeleteFileOrDir.getText());
+                        }
+
+                        //详见 FileUtil 类
+                        batchBackupAndDelete(targetFileTmp, mainDirTmp, fileUtils, statusBar, statusLabel);
+                    }
                 } else {
-                    //详见复制文件类
-                    copyFile(mainDirTmp, targetFile, fileUtils, statusBar, statusLabel);
+                    JOptionPane.showMessageDialog(fileUtils, "备份文件夹不存在。", "错误", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                JOptionPane.showMessageDialog(fileUtils,"主文件夹不存在。", "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(fileUtils, "目标文件夹为空。", "错误", JOptionPane.ERROR_MESSAGE);
             }
-
         });
         dirList1Panel.add(start1);
 
@@ -162,21 +183,30 @@ public class batchCopyPanel {
         dirList2Panel.add(dirList2ScrollPane);
 
         start2.addActionListener(e -> {
-            final String mainDirTmp = mainDirTextField.getText();
-            if (dirList1List != null && dirList1List.size() > 0){
-                if (new File("./" + mainDirTmp).exists()) {
-                    statusLabel.setText("状态: 操作进行中");
-                    if (useMultiThread.isSelected()) {
-                            multiThreadedCopyFile(mainDirTmp, dirList1List, fileUtils, statusBar, statusLabel);
+            String mainDirTmp = backupDirTextField.getText();
+            if (!mainDirTmp.isEmpty()) {
+                if (dirList1List != null && dirList1List.size() > 0) {
+                    if (new File("./" + mainDirTmp).exists()) {
+                        if (securityCheck(targetDeleteFileOrDir.getText(), fileUtils)) {
+                            statusLabel.setText("状态: 操作进行中");
+                            //创建临时路径变量
+                            List<String> targetFileTmp = new ArrayList<>();
+                            //为临时路径变量添加上删除的路径
+                            for (String s : dirList1List) {
+                                targetFileTmp.add(s + "/" + targetDeleteFileOrDir.getText());
+                            }
+
+                            //详见 FileUtil 类
+                            batchBackupAndDelete(targetFileTmp, mainDirTmp, fileUtils, statusBar, statusLabel);
+                        }
                     } else {
-                        //详见复制文件类
-                        copyFile(mainDirTmp, dirList1List, fileUtils, statusBar, statusLabel);
+                        JOptionPane.showMessageDialog(fileUtils, "备份文件夹不存在。", "错误", JOptionPane.ERROR_MESSAGE);
                     }
                 } else {
-                    JOptionPane.showMessageDialog(fileUtils,"主文件夹不存在。", "错误", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(fileUtils, "临时配置为空。", "错误", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
-                JOptionPane.showMessageDialog(fileUtils,"临时配置为空。", "错误", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(fileUtils, "目标文件夹为空。", "错误", JOptionPane.ERROR_MESSAGE);
             }
         });
         dirList2Panel.add(start2);
@@ -186,11 +216,34 @@ public class batchCopyPanel {
         dirListBox.add(dirList2Panel);
 
         //主界面
-        batchCopyUtilPanel.add(mainDirBox);
-        batchCopyUtilPanel.add(dirListBox);
-        batchCopyUtilPanel.add(useMultiThread);
-        batchCopyUtilPanel.add(bottomStatusPanel);
+        batchDeleteUtilPanel.add(mainDirBox);
+        batchDeleteUtilPanel.add(targetDeleteFileOrDirBox);
+        batchDeleteUtilPanel.add(dirListBox);
+        batchDeleteUtilPanel.add(bottomStatusPanel);
 
-        return batchCopyUtilPanel;
+        return batchDeleteUtilPanel;
+    }
+
+    //安全检测
+    private static boolean securityCheck(String str, JFrame fileUtils) {
+        //安全检测
+        if (str.isEmpty()) {
+            JOptionPane.showMessageDialog(fileUtils, "输入内容为空。", "错误", JOptionPane.ERROR_MESSAGE);
+            return false;
+        }
+        for (String s : unavailableStr) {
+            if (str.contains(s)) {
+                JOptionPane.showMessageDialog(fileUtils, "名称包含非法字符。", "错误", JOptionPane.ERROR_MESSAGE);
+                return false;
+            }
+        }
+        for (String s : dangerousStr) {
+            if (str.contains(s)) {
+                int choice = JOptionPane.showConfirmDialog(fileUtils, "您所输入的路径存在危险关键词: “" + s + "”,你确定要继续批量删除操作吗？", "警告", JOptionPane.YES_NO_OPTION);
+                //如果选择为是则继续执行命令，如果为否则中断执行
+                return choice == JOptionPane.YES_OPTION;
+            }
+        }
+        return true;
     }
 }

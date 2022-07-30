@@ -18,7 +18,7 @@ public class Main {
     //主文件夹
     static String mainDir;
     //目标文件夹
-    static List<String> copyToDirPath;
+    static List<String> targetFile;
 
     public static void main(String[] args) {
         SetupSwing.init();
@@ -32,6 +32,12 @@ public class Main {
         File oldCfgYml = new File("./config/config.yml");
         Path outPath = Paths.get("./config/config.yml");
 
+        File cfgDir = new File("./FileUtils");
+        File backupDir = new File("./FileUtils/Backup");
+
+        if (!backupDir.exists()) backupDir.mkdir();
+        if (!cfgDir.exists()) cfgDir.mkdir();
+
         if (oldCfgDir.exists()) {
             if (oldCfgYml.exists()) {
                 try {
@@ -44,10 +50,6 @@ public class Main {
             }
         }
 
-        File cfgDir = new File("./FileUtils");
-        if (!cfgDir.exists()){
-            cfgDir.mkdir();
-        }
         File cfgYml = new File("./FileUtils/config.yml");
         Path path = Paths.get("./FileUtils/config.yml");
         if (!cfgYml.exists()){
@@ -77,16 +79,16 @@ public class Main {
 
     public void init() {
         //读取配置文件
-        copyToDirPath = GetCFG("CopyToDirPath");
+        targetFile = GetCFG("CopyToDirPath");
         mainDir = GetCFG("DirPath");
 
         //去重
-        copyToDirPath = copyToDirPath.stream().distinct().collect(Collectors.toList());
+        targetFile = targetFile.stream().distinct().collect(Collectors.toList());
 
         //移除与主文件夹相等的配置
-        for (int i = 0; i < copyToDirPath.size(); i++) {
-            if (copyToDirPath.get(i).equals(mainDir)) {
-                copyToDirPath.remove(i);
+        for (int i = 0; i < targetFile.size(); i++) {
+            if (targetFile.get(i).equals(mainDir)) {
+                targetFile.remove(i);
                 i--;
             }
         }
@@ -95,7 +97,7 @@ public class Main {
         System.out.println("主文件夹: " + mainDir);
 
         //将被复制的文件夹
-        for (String s : copyToDirPath) {
+        for (String s : targetFile) {
             System.out.println("目标文件夹: " + s);
         }
 
@@ -109,6 +111,7 @@ public class Main {
          */
         //主窗口配置
         tabbedPane.add(new batchCopyPanel().createPanel(fileUtils),"批量复制器");
+        tabbedPane.add(new batchDeletePanel().createPanel(fileUtils), "批量删除器");
 
         fileUtils.add(tabbedPane);
         fileUtils.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
