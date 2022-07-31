@@ -143,6 +143,11 @@ public class batchCopyPanel {
         start1.addActionListener(e -> {
             final String mainDirTmp = mainDirTextField.getText();
             if (new File("./" + mainDirTmp).exists()) {
+                long[] fileCount = new FileCounter.fileCounter().getDirFileCountAndTotalSize(mainDir);
+                if (fileCount[0] == 0 && fileCount[2] == 0) {
+                    JOptionPane.showMessageDialog(fileUtils,"主文件夹没有需要复制的文件或文件夹。", "错误", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
                 statusLabel.setText("状态: 操作进行中");
                 if (useMultiThread.isSelected()) {
                     multiThreadedCopyFile(mainDirTmp, targetFile, fileUtils, statusBar, statusLabel);
@@ -165,6 +170,11 @@ public class batchCopyPanel {
             final String mainDirTmp = mainDirTextField.getText();
             if (dirList1List != null && dirList1List.size() > 0){
                 if (new File("./" + mainDirTmp).exists()) {
+                    long[] fileCount = new FileCounter.fileCounter().getDirFileCountAndTotalSize(mainDir);
+                    if (fileCount[0] == 0 && fileCount[2] == 0) {
+                        JOptionPane.showMessageDialog(fileUtils,"主文件夹没有需要复制的文件或文件夹。", "错误", JOptionPane.ERROR_MESSAGE);
+                        return;
+                    }
                     statusLabel.setText("状态: 操作进行中");
                     if (useMultiThread.isSelected()) {
                             multiThreadedCopyFile(mainDirTmp, dirList1List, fileUtils, statusBar, statusLabel);

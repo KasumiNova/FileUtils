@@ -8,13 +8,15 @@ public class FileCounter {
      */
     public static class fileCounter {
         int count = 0;
+        int dirCount = 0;
         long size = 0;
         public long[] getDirFileCountAndTotalSize(String path) {
-            long[] count = new long[2];
+            long[] count = new long[3];
             getFile("./" + path);
             count[0] = this.count;
             count[1] = size;
-            System.out.println("共有 " + count[0] + " 个文件");
+            count[2] = dirCount;
+            System.out.println("共有 " + count[0] + " 个文件，" + count[2] + " 个文件夹");
             return count;
         }
 
@@ -28,6 +30,7 @@ public class FileCounter {
                     String temp = value.toString().substring(7);
                     count++;
                 } else {
+                    dirCount++;
                     getFile(value.toString());
                 }
             }

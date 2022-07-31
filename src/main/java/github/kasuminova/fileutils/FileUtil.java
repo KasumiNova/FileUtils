@@ -202,21 +202,22 @@ public class FileUtil {
             counts = new FileCounter.fileCounter().getDirFileCountAndTotalSize(mainDir);
             System.out.println("counts:" + Arrays.toString(counts));
 
-            int totalFileCount = (int) counts[0] * copyToDirPath.size();
-
-            AtomicInteger totalProgress = new AtomicInteger();
+            int totalFileCount = (int) (counts[0] + counts[2]) * copyToDirPath.size();
 
             JFrame copyThreadFrame = new JFrame("请稍等...");
-            copyThreadFrame.setSize(500, 115);
+            copyThreadFrame.setSize(500, 145);
 
             JLabel installLabel = new JLabel("进程正在复制文件夹内容，进度: ");
-            JProgressBar mainProgressBar = new JProgressBar(0, 100);
+            JProgressBar mainProgressBar = new JProgressBar(0, totalFileCount);
             mainProgressBar.setStringPainted(true);
+            JProgressBar dirsCountProgressBar = new JProgressBar(0, (int) counts[2] * copyToDirPath.size());
+            dirsCountProgressBar.setStringPainted(true);
 
             JPanel copyThreadPanel = new JPanel();
             copyThreadPanel.setLayout(new VFlowLayout());
             copyThreadPanel.add(installLabel);
             copyThreadPanel.add(mainProgressBar);
+            copyThreadPanel.add(dirsCountProgressBar);
 
             copyThreadFrame.add(copyThreadPanel);
             copyThreadFrame.setLocationRelativeTo(fileUtils);
@@ -228,15 +229,15 @@ public class FileUtil {
             new Thread(multiCopyThread).start();
 
             Timer timer = new Timer(25, t -> {
-                totalProgress.set((multiCopyThread.getCount() * 100) / totalFileCount);
                 //如果操作时间超过 1 秒再弹出操作对话框
                 if (startTime + 1000 <= System.currentTimeMillis() && !copyThreadFrame.isVisible()) {
                     copyThreadFrame.setVisible(true);
                 }
-                mainProgressBar.setString(multiCopyThread.getCount() + " / " + totalFileCount);
-                mainProgressBar.setValue(totalProgress.get());
+                mainProgressBar.setString(totalFileCount + " 文件 / " + totalFileCount + " 文件");
+                mainProgressBar.setValue(totalFileCount);
+                dirsCountProgressBar.setString(multiCopyThread.getDirCount() + "文件夹 / " + dirsCountProgressBar.getMaximum() + " 文件夹");
                 statusBar.setString(String.format("%.2f", (double) (multiCopyThread.getCount() * 100) / totalFileCount) + "%");
-                statusBar.setValue(totalProgress.get());
+                statusBar.setValue(totalFileCount);
             });
 
             mainProgressBar.addChangeListener(e1 -> {
