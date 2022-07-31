@@ -10,13 +10,13 @@ import java.util.Objects;
 
 public class SetupSwing {
     public static void init() {
-        System.setProperty("awt.useSystemAAFontSettings", "on");
+        System.setProperty("awt.useSystemAAFontSettings", "lcd");
         System.setProperty("swing.aatext", "true");
 
         //设置字体
         try {
             Font font = Font.createFont(Font.TRUETYPE_FONT, Objects.requireNonNull(Main.class.getResourceAsStream("/font/font.ttf")));
-            Font newFont = font.deriveFont(18f);
+            Font newFont = font.deriveFont(16f);
             initGlobalFont(newFont);
         } catch (Exception e) {
             e.printStackTrace();
@@ -30,10 +30,10 @@ public class SetupSwing {
         }
 
         //设置圆角弧度
-        UIManager.put("Button.arc", 5);
-        UIManager.put("Component.arc", 5);
-        UIManager.put("CheckBox.arc", 5);
-        UIManager.put("ProgressBar.arc", 5);
+        UIManager.put("Button.arc", 999);
+        UIManager.put("Component.arc", 999);
+        UIManager.put("CheckBox.arc", 3);
+        UIManager.put("ProgressBar.arc", 999);
         UIManager.put("TextComponent.arc", 5);
 
         //设置蓝色描边宽度
@@ -58,7 +58,7 @@ public class SetupSwing {
         for(Enumeration<Object> keys = UIManager.getDefaults().keys(); keys.hasMoreElements();) {
             Object key = keys.nextElement();
             Object value = UIManager.get(key);
-            if(value instanceof FontUIResource) {
+            if (value instanceof FontUIResource) {
                 System.out.println(key);
                 UIManager.put(key, fontResource);
             }

@@ -104,11 +104,11 @@ public class batchCopyPanel {
 
         dirList1.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
 
-        dirList1.setVisibleRowCount(10);
-        dirList2.setVisibleRowCount(10);
+        dirList1.setVisibleRowCount(12);
+        dirList2.setVisibleRowCount(12);
 
-        dirList1.setFixedCellWidth(240);
-        dirList2.setFixedCellWidth(240);
+        dirList1.setFixedCellWidth(215);
+        dirList2.setFixedCellWidth(215);
 
         String[] info = {"从左侧选择项目后, 右键添加"};
         dirList2.setListData(info);
