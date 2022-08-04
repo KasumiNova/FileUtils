@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class Main {
     //版本号
-    public static final String version = "1.5.2";
+    public static final String version = "1.5.3";
     JFrame fileUtils = new JFrame("文件批量管理工具 " + version);
     JTabbedPane tabbedPane = new JTabbedPane(SwingConstants.LEFT,JTabbedPane.SCROLL_TAB_LAYOUT);
     static Map<String, Object> config;
@@ -112,6 +112,7 @@ public class Main {
          组装内容
          */
         //主窗口配置
+        //TODO:计划添加实时文件变动监听
         tabbedPane.add(new batchCopyPanel().createPanel(fileUtils),"批量复制器");
         tabbedPane.add(new batchDeletePanel().createPanel(fileUtils), "批量删除器");
 

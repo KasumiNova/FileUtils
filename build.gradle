@@ -18,7 +18,7 @@ repositories {
 jar {
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     archivesBaseName = 'FileUtils'//基本的文件名
-    archiveVersion = '1.5.2' //版本
+    archiveVersion = '1.5.3' //版本
     manifest { //配置 Jar 文件的 Manifest
         attributes(
                 "Manifest-Version": 1.0,
